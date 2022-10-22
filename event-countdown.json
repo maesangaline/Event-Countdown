@@ -1,0 +1,122 @@
+(function () {
+        var container = document.getElementById('event-countdown');
+        if (container == null) {
+            return;
+        }
+        var events = [
+            [
+                // Sunday
+                {time: new Date().setUTCHours(2, 0, 0, 0), title: 'Event One'},
+                {time: new Date().setUTCHours(6, 0, 0, 0), title: 'Event Two'}
+            ],
+            [
+                // Monday
+                {time: new Date().setUTCHours(2, 0, 0, 0), title: 'Event One'},
+                {time: new Date().setUTCHours(6, 0, 0, 0), title: 'Event Two'}
+            ],
+            [
+                // Tuesday
+                {time: new Date().setUTCHours(2, 0, 0, 0), title: 'Event One'},
+                {time: new Date().setUTCHours(6, 0, 0, 0), title: 'Event Two'}
+            ],
+            [
+                // Wednesday
+                {time: new Date().setUTCHours(2, 0, 0, 0), title: 'Event One'},
+                {time: new Date().setUTCHours(6, 0, 0, 0), title: 'Event Two'}
+            ],
+            [
+                // Thursday
+                {time: new Date().setUTCHours(2, 0, 0, 0), title: 'Event One'},
+                {time: new Date().setUTCHours(6, 0, 0, 0), title: 'Event Two'}
+            ],
+            [
+                // Friday
+                {time: new Date().setUTCHours(2, 0, 0, 0), title: 'Event One'},
+                {time: new Date().setUTCHours(6, 0, 0, 0), title: 'Event Two'}
+            ],
+            [
+                // Saturday
+                {time: new Date().setUTCHours(2, 0, 0, 0), title: 'Event One'},
+                {time: new Date().setUTCHours(6, 0, 0, 0), title: 'Event Two'}
+            ]
+        ];
+        var date = new Date();
+        var currentDay = date.getUTCDay();
+        var upcomingEvents = getUpcomingEvents();
+        function sortEventsByTime() {
+            var result = [];
+            for (var i = 0; i < events.length; i++) {
+                result.push(events[i].sort(function (a, b) {
+                    return new Date(a.time) - new Date(b.time);
+                }));
+            }
+            return result;
+        }
+        function countEvents(events) {
+            var result = 0;
+            events.forEach(function (day) {
+                result += day.length
+            });
+            return result;
+        }
+        function getUpcomingEvents() {
+            var events = sortEventsByTime();
+            var totalEvents = countEvents(events);
+            var result = [];
+            var index = currentDay;
+            var future = 0;
+            var futureTime = 24 * 60 * 60 * 1000;
+            while (result.length < totalEvents) {
+                events[index].forEach(function (event) {
+                    result.push({title: event.title, time: event.time + future * futureTime});
+                });
+                index++;
+                index = index % 7;
+                future++;
+            }
+            return result;
+        }
+        function render() {
+            container.innerHTML = renderEvents(upcomingEvents);
+        }
+        function renderEvents(events) {
+            var result = '';
+            var currentTime = new Date().getTime();
+            var renderedEvents = 0;
+            for (var i = 0; i < events.length; i++) {
+                if (currentTime < events[i].time) {
+                    result += renderEvent(events[i].title, events[i].time - currentTime);
+                    renderedEvents++;
+                }
+                if (renderedEvents >= 5) {
+                    break;
+                }
+            }
+            return (
+                '<table class="table"><thead><tr><th>Event</th><th>Time Until</th></tr></thead><tbody>' + result + '</tbody></table>'
+            );
+        }
+        function renderEvent(title, time) {
+            return '<tr></tr><td class="title">' + title + '</td><td class="time">' + renderTime(time) + '</td></tr>';
+        }
+        function renderTime(time) {
+            var sec_num = parseInt(time / 1000);
+            var hours = Math.floor(sec_num / 3600);
+            var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+            var seconds = sec_num - (hours * 3600) - (minutes * 60);
+            if (hours < 10) {
+                hours = "0" + hours;
+            }
+            if (minutes < 10) {
+                minutes = "0" + minutes;
+            }
+            if (seconds < 10) {
+                seconds = "0" + seconds;
+            }
+            return hours + ':' + minutes + ':' + seconds;
+        }
+        function startCountdown() {
+            setInterval(function() { render() }, 1000);
+        }
+        startCountdown();
+    }());
